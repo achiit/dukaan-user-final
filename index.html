@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#1E3A8A">
+  <title>JMKCC Study</title>
+  <link rel="manifest" href='data:application/manifest+json,{"name":"JMKCC Study","short_name":"JMKCC","start_url":".","display":"standalone","background_color":"#1E3A8A","theme_color":"#1E3A8A","icons":[{"src":"https://i.ibb.co/ycf1gWjz/file-0000000029f082089bbd35f27746b551.png","sizes":"192x192","type":"image/png"}]}'>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --blue:#1E3A8A; --blue-light:#DBEAFE; --blue-grad:linear-gradient(135deg,#1E3A8A 0%,#3B82F6 100%); --green:#059669; --green-grad:linear-gradient(135deg,#059669 0%,#10B981 100%); --gold:linear-gradient(135deg,#F59E0B 0%,#FBBF24 100%); --bg:#F0F4F8; --card:#FFFFFF; --text:#1E293B; --text-light:#64748B; --border:#E2E8F0; --font-h:'Poppins',sans-serif; --font-b:'Roboto',sans-serif; }
+    body.dark-mode { --blue:#60A5FA; --blue-light:#1E3A8A; --bg:#0F172A; --card:#1E293B; --text:#F8FAFC; --text-light:#94A3B8; --border:#334155; }
+    
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
+    body{background:var(--bg);color:var(--text);overflow-x:hidden;height:100vh;font-family:var(--font-b);transition:0.3s}
+    .hidden{display:none!important}
+    ::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:5px}
+    
+    /* Loader */
+    #loader{position:fixed;inset:0;background:var(--card);z-index:99999;display:flex;flex-direction:column;justify-content:center;align-items:center}
+    .spin{width:45px;height:45px;border:4px solid var(--blue-light);border-top:4px solid var(--blue);border-radius:50%;animation:sp 1s linear infinite}
+    @keyframes sp{100%{transform:rotate(360deg)}}
+
+    /* Modals */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:10000;display:none;justify-content:center;align-items:center;padding:20px;backdrop-filter:blur(4px)}
+    .modal-card{background:var(--card);border-radius:24px;padding:25px;width:100%;max-width:400px;text-align:center;position:relative;animation:popIn 0.3s}
+    @keyframes popIn{from{transform:scale(0.9);opacity:0}to{transform:scale(1);opacity:1}}
+    .close-btn{position:absolute;top:15px;right:20px;background:none;border:none;font-size:26px;color:var(--text-light);cursor:pointer}
+    
+    /* Inputs & Buttons */
+    .btn-main{background:var(--green-grad);color:#fff;border:none;padding:16px;border-radius:16px;font-size:16px;font-family:var(--font-h);font-weight:700;width:100%;margin-top:10px;cursor:pointer;box-shadow:0 4px 12px rgba(5,150,105,0.3)}
+    .btn-blue{background:var(--blue-grad);box-shadow:0 4px 12px rgba(30,58,138,0.3)}
+    .premium-input{width:100%;padding:16px;border:2px solid var(--border);border-radius:14px;font-size:15px;font-family:var(--font-h);font-weight:600;margin-bottom:14px;outline:none;background:var(--bg);color:var(--text);transition:0.3s;user-select:text}
+    .premium-input:focus{border-color:var(--blue);background:var(--card);box-shadow:0 0 0 3px var(--blue-light)}
+    
+    /* App Layout */
+    #app{padding-bottom:90px;height:100vh;overflow-y:auto}
+    .header{background:var(--blue-grad);padding:20px 16px;display:flex;justify-content:space-between;align-items:center;color:#fff;border-radius:0 0 24px 24px;position:sticky;top:0;z-index:100}
+    .header h2{font-size:20px;font-family:var(--font-h);font-weight:800}
+    
+    /* Grid */
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:20px 16px}
+    .grid-item{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.02);transition:0.2s}
+    .grid-item:active{transform:scale(0.95);background:var(--blue-light)}
+    .grid-icon{font-size:28px;margin-bottom:8px}
+    .grid-item span{font-size:11px;font-family:var(--font-h);font-weight:700;color:var(--text)}
+    
+    /* Cards */
+    .card{background:var(--card);border-radius:16px;padding:16px;margin:0 16px 16px;box-shadow:0 4px 15px rgba(0,0,0,0.04);border:1px solid var(--border);display:flex;gap:15px;align-items:center;position:relative;overflow:hidden}
+    .card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--blue)}
+    .card.paid::before{background:#F59E0B}
+    .card img{width:70px;height:70px;border-radius:12px;object-fit:cover;background:var(--border)}
+    .card-info{flex:1}
+    .card-title{font-size:15px;font-family:var(--font-h);font-weight:800;margin-bottom:4px}
+    .card-sub{font-size:12px;color:var(--text-light);font-weight:500}
+    .btn-buy{background:var(--blue);color:#fff;border:none;padding:8px 16px;border-radius:10px;font-family:var(--font-h);font-weight:700;font-size:13px;margin-top:8px;cursor:pointer}
+    .price{font-size:16px;font-weight:800;color:var(--green);margin-right:10px}
+    
+    /* Bottom Nav */
+    .nav{position:fixed;bottom:0;width:100%;max-width:400px;background:var(--card);display:flex;justify-content:space-around;padding:12px 0;box-shadow:0 -2px 15px rgba(0,0,0,0.05);border-radius:24px 24px 0 0;z-index:100;left:50%;transform:translateX(-50%);border-top:1px solid var(--border)}
+    .nav-item{display:flex;flex-direction:column;align-items:center;color:var(--text-light);font-size:10px;font-family:var(--font-h);font-weight:700;gap:4px;cursor:pointer}
+    .nav-item.active{color:var(--blue)}
+    .nav-icon{font-size:20px}
+
+    /* Auth */
+    #auth{position:fixed;inset:0;background:var(--card);z-index:9999;padding:30px 24px;display:flex;flex-direction:column;justify-content:center;overflow-y:auto;}
+    .logo{width:100px;height:100px;border-radius:50%;border:4px solid var(--green);margin:0 auto 20px;display:block}
+    
+    /* Payment */
+    .qr-box{background:#fff;padding:10px;border-radius:16px;display:inline-block;margin:15px 0;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
+    .qr-box img{width:200px;height:200px;object-fit:contain}
+    .upi-box{background:var(--blue-light);padding:12px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+    .upi-text{font-family:monospace;font-size:16px;font-weight:bold;color:var(--blue)}
+    .btn-copy{background:var(--blue);color:#fff;border:none;padding:6px 12px;border-radius:8px;font-weight:bold;cursor:pointer}
+
+    /* Test CSS */
+    .test-body{padding:20px;display:none}
+    .option{background:var(--card);border:2px solid var(--border);padding:15px;border-radius:12px;margin-bottom:10px;cursor:pointer;font-weight:600}
+    .option.sel{border-color:var(--blue);background:var(--blue-light)}
+  </style>
+</head>
+<body>
+
+  <div id="loader"><div class="spin"></div><p style="margin-top:10px;font-weight:bold;color:var(--blue)">JMKCC Loading...</p></div>
+
+  <!-- AUTH SCREEN -->
+  <div id="auth" class="hidden">
+    <img src="https://i.ibb.co/ycf1gWjz/file-0000000029f082089bbd35f27746b551.png" class="logo">
+    <h2 style="text-align:center;color:var(--blue);font-family:var(--font-h);margin-bottom:20px;">JMKCC Study</h2>
+    
+    <div id="reg-box">
+      <input type="text" id="reg-name" class="premium-input" placeholder="Full Name">
+      <input type="text" id="reg-id" class="premium-input" placeholder="Mobile (10 digits) or Gmail">
+      <input type="password" id="reg-pass" class="premium-input" placeholder="Password (min 6 chars)">
+      <button class="btn-main" onclick="doRegister()">Register with Google</button>
+    </div>
+    
+    <div id="log-box" class="hidden">
+      <input type="text" id="log-id" class="premium-input" placeholder="Mobile or Gmail">
+      <input type="password" id="log-pass" class="premium-input" placeholder="Password">
+      <button class="btn-main btn-blue" onclick="doLogin()">Login</button>
+    </div>
+    <p id="auth-msg" style="text-align:center;color:red;font-size:13px;margin-top:10px;font-weight:bold;"></p>
+  </div>
+
+  <!-- PROFILE SETUP MODAL (FOR GOOGLE LOGIN) -->
+  <div id="profile-modal" class="modal-overlay">
+    <div class="modal-card">
+      <h3 style="color:var(--blue);font-family:var(--font-h);margin-bottom:15px;">Complete Profile</h3>
+      <p style="font-size:13px;color:var(--text-light);margin-bottom:15px;">Apna Mobile Number dalein</p>
+      <input type="text" id="setup-mobile" class="premium-input" placeholder="10 Digit Mobile Number" maxlength="10">
+      <button class="btn-main" onclick="saveProfile()">Save & Continue</button>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="app" class="hidden">
+    <div class="header">
+      <div>
+        <h2>Hello, <span id="user-name">Student</span></h2>
+        <p style="font-size:12px;opacity:0.8">Class 12th • 🔥 <span id="streak">1</span> Day Streak</p>
+      </div>
+      <div style="display:flex;gap:15px;font-size:22px;">
+        <span onclick="toggleDark()">🌙</span>
+        <span onclick="logout()">🚪</span>
+      </div>
+    </div>
+
+    <div style="padding:20px 16px 0;">
+      <!-- LIVE BANNER -->
+      <div id="live-banner" class="hidden" style="background:linear-gradient(90deg,#EF4444,#DC2626);padding:15px;border-radius:16px;display:flex;justify-content:space-between;align-items:center;color:#fff;margin-bottom:15px;">
+        <div><b style="font-size:15px;">🔴 Live Class Started!</b></div>
+        <button onclick="window.open(liveLink,'_blank')" style="background:#fff;color:#DC2626;border:none;padding:6px 12px;border-radius:8px;font-weight:bold;">Join</button>
+      </div>
+
+      <div class="grid">
+        <div class="grid-item" onclick="showPage('page-courses')"><div class="grid-icon">💎</div><span>Courses</span></div>
+        <div class="grid-item" onclick="showPage('page-notes')"><div class="grid-icon">📄</div><span>Notes</span></div>
+        <div class="grid-item" onclick="startTestFlow()"><div class="grid-icon">📝</div><span>Mock<br>Tests</span></div>
+        <div class="grid-item" onclick="showPage('page-ncert')"><div class="grid-icon">📚</div><span>NCERT</span></div>
+        <div class="grid-item" onclick="showPage('page-saved')"><div class="grid-icon">🔖</div><span>Saved</span></div>
+        <div class="grid-item" onclick="document.getElementById('doubt-modal').style.display='flex'"><div class="grid-icon">❓</div><span>Ask<br>Doubt</span></div>
+      </div>
+
+      <h3 style="font-family:var(--font-h);margin:0 16px 10px;color:var(--blue)">Latest Courses</h3>
+      <div id="home-courses"></div>
+    </div>
+
+    <div class="nav">
+      <div class="nav-item active" onclick="showPage('home')"><span class="nav-icon">🏠</span>Home</div>
+      <div class="nav-item" onclick="showPage('page-courses')"><span class="nav-icon">📚</span>Courses</div>
+      <div class="nav-item" onclick="startTestFlow()"><span class="nav-icon">📝</span>Tests</div>
+      <div class="nav-item" onclick="showPage('page-profile')"><span class="nav-icon">👤</span>Profile</div>
+    </div>
+  </div>
+
+  <!-- PAGES (COURSES, NOTES, PROFILE, SAVED) -->
+  <div id="page-courses" class="hidden" style="position:fixed;inset:0;background:var(--bg);z-index:200;overflow-y:auto;padding-bottom:20px;">
+    <div class="header"><button onclick="hidePage('page-courses')" style="background:none;border:none;color:#fff;font-size:20px;">←</button><h2>All Courses</h2><div></div></div>
+    <div id="course-list" style="padding-top:15px;"></div>
+  </div>
+  
+  <div id="page-notes" class="hidden" style="position:fixed;inset:0;background:var(--bg);z-index:200;overflow-y:auto;padding-bottom:20px;">
+    <div class="header"><button onclick="hidePage('page-notes')" style="background:none;border:none;color:#fff;font-size:20px;">←</button><h2>Study Notes</h2><div></div></div>
+    <div id="notes-list" style="padding-top:15px;"></div>
+  </div>
+
+  <div id="page-ncert" class="hidden" style="position:fixed;inset:0;background:var(--bg);z-index:200;overflow-y:auto;padding-bottom:20px;">
+    <div class="header"><button onclick="hidePage('page-ncert')" style="background:none;border:none;color:#fff;font-size:20px;">←</button><h2>NCERT Books</h2><div></div></div>
+    <div id="ncert-list" style="padding-top:15px;"></div>
+  </div>
+
+  <div id="page-saved" class="hidden" style="position:fixed;inset:0;background:var(--bg);z-index:200;overflow-y:auto;padding-bottom:20px;">
+    <div class="header"><button onclick="hidePage('page-saved')" style="background:none;border:none;color:#fff;font-size:20px;">←</button><h2>Saved Items</h2><div></div></div>
+    <div id="saved-list" style="padding-top:15px;"></div>
+  </div>
+
+  <!-- PAYMENT MODAL -->
+  <div id="payment-modal" class="modal-overlay">
+    <div class="modal-card">
+      <button class="close-btn" onclick="document.getElementById('payment-modal').style.display='none'">&times;</button>
+      <h3 style="font-family:var(--font-h);color:var(--blue);font-size:20px;">Complete Payment</h3>
+      <p style="font-size:13px;color:var(--text-light);margin-top:5px;">GPay/PhonePe/Paytm से QR स्कैन करें</p>
+      
+      <div class="qr-box">
+        <img id="pay-qr" src="" alt="QR Code">
+      </div>
+      
+      <div class="upi-box">
+        <span class="upi-text" id="pay-upi">loading...</span>
+        <button class="btn-copy" onclick="copyUpi()">Copy</button>
+      </div>
+
+      <div style="text-align:left;margin-bottom:15px;">
+        <label style="font-size:13px;font-weight:bold;color:var(--text-light);">12-Digit UTR / Transaction ID</label>
+        <input type="text" id="pay-utr" class="premium-input" placeholder="e.g. 123456789012" style="margin-top:5px;">
+      </div>
+
+      <input type="hidden" id="pay-course-id">
+      <input type="hidden" id="pay-course-title">
+      <input type="hidden" id="pay-amount">
+
+      <button class="btn-main" id="pay-btn" onclick="submitPayment()">Verify Payment</button>
+    </div>
+  </div>
+
+  <!-- DOUBT MODAL -->
+  <div id="doubt-modal" class="modal-overlay">
+    <div class="modal-card">
+      <button class="close-btn" onclick="document.getElementById('doubt-modal').style.display='none'">&times;</button>
+      <h3 style="color:var(--blue);font-family:var(--font-h);">Ask a Doubt</h3>
+      <textarea id="doubt-text" class="premium-input" rows="4" style="margin-top:10px;resize:none;"></textarea>
+      <button class="btn-main" onclick="submitDoubt()">Send</button>
+    </div>
+  </div>
+
+  <!-- TEST ROLL NO MODAL -->
+  <div id="roll-modal" class="modal-overlay">
+    <div class="modal-card">
+      <h3 style="color:var(--blue);font-family:var(--font-h);margin-bottom:15px;">Test Details</h3>
+      <input type="text" id="roll-name" class="premium-input" placeholder="Your Name" readonly style="opacity:0.7;">
+      <input type="text" id="roll-class" class="premium-input" placeholder="Class (e.g. 12th)" readonly style="opacity:0.7;">
+      <input type="text" id="roll-number" class="premium-input" placeholder="Enter Roll Number">
+      <button class="btn-main" onclick="startTestWithRoll()">Start Test</button>
+    </div>
+  </div>
+
+  <!-- TEST SCREEN -->
+  <div id="test-screen" class="hidden" style="position:fixed;inset:0;background:var(--bg);z-index:9999;overflow-y:auto;">
+    <div class="header" style="border-radius:0;"><h2 id="test-title">Test</h2><div id="test-timer" style="background:#fff;color:#1E3A8A;padding:5px 10px;border-radius:10px;font-weight:bold;">00:00</div></div>
+    <div class="test-body" id="test-body" style="display:block;">
+      <h3 id="q-text" style="margin-bottom:15px;font-family:var(--font-h);">Question...</h3>
+      <div id="q-options"></div>
+      <button class="btn-main" onclick="nextQuestion()" style="margin-top:20px;">Next / Submit</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, EmailAuthProvider, linkWithCredential, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = { apiKey: "AIzaSyBvSzyAokTjxghA1kE1Ax97j4q_HeADtRI", authDomain: "jmkcc-c09c7.firebaseapp.com", projectId: "jmkcc-c09c7", storageBucket: "jmkcc-c09c7.firebasestorage.app", messagingSenderId: "659653592447", appId: "1:659653592447:web:6d442dc59550f14226c64a" };
+    const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+    setPersistence(auth, browserLocalPersistence).catch(console.error);
+
+    let userData = {}; let liveLink = ""; let upiId = ""; let qrUrl = ""; let askRollNo = false;
+    let bookmarks = JSON.parse(localStorage.getItem('jmkcc_bm') || '[]');
+    let currentTestData = null, qIndex = 0, answers = {}, testTimer;
+
+    // Dark Mode & Streak
+    if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+    window.toggleDark = () => { document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); };
+    const today = new Date().toDateString(); let last = localStorage.getItem('last_login');
+    if(last !== today) { localStorage.setItem('streak', parseInt(localStorage.getItem('streak')||'0')+1); localStorage.setItem('last_login', today); }
+    document.getElementById('streak').innerText = localStorage.getItem('streak') || 1;
+
+    // Auth
+    window.doRegister = async () => {
+      const name = document.getElementById('reg-name').value, id = document.getElementById('reg-id').value, pass = document.getElementById('reg-pass').value;
+      if(!name || !id || pass.length < 6) return alert("Fill correctly. Pass > 6 chars.");
+      try {
+        const res = await signInWithPopup(auth, new GoogleAuthProvider());
+        try { await linkWithCredential(res.user, EmailAuthProvider.credential(res.user.email, pass)); } catch(e){}
+        await setDoc(doc(db, "users", res.user.uid), { name, mobile: /^\d{10}$/.test(id)?id:'Not Provided', email: res.user.email, class: '12th' });
+        localStorage.setItem('device_registered', 'true');
+      } catch(e) { document.getElementById('auth-msg').innerText = e.message; }
+    };
+
+    window.doLogin = async () => {
+      const id = document.getElementById('log-id').value, pass = document.getElementById('log-pass').value;
+      try {
+        let email = id;
+        if(/^\d{10}$/.test(id)) {
+          const s = await getDocs(query(collection(db,"users"), where("mobile","==",id)));
+          if(s.empty) throw new Error("Mobile not registered");
+          email = s.docs[0].data().email;
+        }
+        await signInWithEmailAndPassword(auth, email, pass);
+        localStorage.setItem('device_registered', 'true');
+      } catch(e) { document.getElementById('auth-msg').innerText = e.message; }
+    };
+
+    window.saveProfile = async () => {
+      const mob = document.getElementById('setup-mobile').value;
+      if(!/^\d{10}$/.test(mob)) return alert("10 digit mobile dalein");
+      await setDoc(doc(db, "users", userData.uid), { mobile: mob }, {merge:true});
+      document.getElementById('profile-modal').style.display = 'none';
+      document.getElementById('app').classList.remove('hidden');
+      userData.mobile = mob; loadData();
+    };
+    window.logout = () => { if(confirm("Logout?")) signOut(auth); };
+
+    onAuthStateChanged(auth, async (user) => {
+      document.getElementById('loader').style.display = 'none';
+      if(user) {
+        const snap = await getDoc(doc(db, "users", user.uid));
+        if(snap.exists()) {
+          userData = { uid: user.uid, ...snap.data() };
+          document.getElementById('auth').classList.add('hidden');
+          if(userData.mobile === 'Not Provided') { document.getElementById('profile-modal').style.display = 'flex'; }
+          else { document.getElementById('app').classList.remove('hidden'); loadData(); }
+          document.getElementById('user-name').innerText = userData.name.split(' ')[0];
+          document.getElementById('roll-name').value = userData.name;
+          document.getElementById('roll-class').value = userData.class;
+        }
+      } else {
+        document.getElementById('auth').classList.remove('hidden');
+        document.getElementById('app').classList.add('hidden');
+        const isReg = localStorage.getItem('device_registered') === 'true';
+        document.getElementById('reg-box').classList.toggle('hidden', isReg);
+        document.getElementById('log-box').classList.toggle('hidden', !isReg);
+      }
+    });
+
+    // Load Data
+    async function loadData() {
+      const s = await getDoc(doc(db, "settings", "app"));
+      if(s.exists()) {
+        const d = s.data();
+        if(d.liveClassLink) { liveLink = d.liveClassLink; document.getElementById('live-banner').classList.remove('hidden'); }
+        if(d.upiId) upiId = d.upiId;
+        if(d.qrCodeUrl) qrUrl = d.qrCodeUrl;
+        askRollNo = d.askRollNo || false;
+      }
+      document.getElementById('pay-upi').innerText = upiId || "Not Set";
+      
+      // Courses
+      const cSnap = await getDocs(collection(db, "courses"));
+      let cHtml = '';
+      cSnap.forEach(c => {
+        const d = c.data();
+        cHtml += `<div class="card ${d.type==='paid'?'paid':''}">
+          <img src="${d.imageUrl||'https://images.unsplash.com/photo-1497633762265-9d179a990aa6'}">
+          <div class="card-info"><div class="card-title">${d.title}</div><div class="card-sub">${d.subject} • ${d.validity||'Lifetime'}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+            <span class="price">${d.type==='paid' ? '₹'+d.price : 'FREE'}</span>
+            <button class="btn-buy" onclick="handleBuy('${c.id}','${d.title}',${d.price||0},'${d.type}')">${d.type==='paid'?'Buy':'Watch'}</button>
+          </div></div></div>`;
+      });
+      document.getElementById('home-courses').innerHTML = cHtml;
+      document.getElementById('course-list').innerHTML = cHtml;
+      
+      // Notes (Basic)
+      const nSnap = await getDocs(collection(db, "notes"));
+      let nHtml = '';
+      nSnap.forEach(n => { nHtml += `<div class="card"><div class="card-info"><div class="card-title">${n.data().title}</div></div><a href="${n.data().pdfUrl}" target="_blank" class="btn-buy" style="text-decoration:none;">PDF</a></div>`});
+      document.getElementById('notes-list').innerHTML = nHtml;
+    }
+
+    window.handleBuy = (id, title, price, type) => {
+      if(type === 'free') return alert("Opening free content!");
+      document.getElementById('pay-course-id').value = id;
+      document.getElementById('pay-course-title').value = title;
+      document.getElementById('pay-amount').value = price;
+      // Generate dynamic QR
+      document.getElementById('pay-qr').src = qrUrl || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=${upiId||'test@upi'}&am=${price}&cu=INR`;
+      document.getElementById('payment-modal').style.display = 'flex';
+    };
+
+    window.copyUpi = () => { navigator.clipboard.writeText(upiId); alert("Copied!"); };
+    window.submitPayment = async () => {
+      const utr = document.getElementById('pay-utr').value;
+      if(utr.length < 8) return alert("Valid UTR dalein");
+      await addDoc(collection(db, "payments"), {
+        userId: userData.uid, name: userData.name, mobile: userData.mobile,
+        courseId: document.getElementById('pay-course-id').value,
+        courseTitle: document.getElementById('pay-course-title').value,
+        amount: document.getElementById('pay-amount').value,
+        utr: utr, status: 'pending', date: new Date()
+      });
+      alert("✅ Payment submitted!"); document.getElementById('payment-modal').style.display = 'none';
+    };
+
+    window.submitDoubt = async () => {
+      const txt = document.getElementById('doubt-text').value;
+      if(!txt) return;
+      await addDoc(collection(db, "doubts"), { name: userData.name, mobile: userData.mobile, doubt: txt, status: 'pending', date: new Date() });
+      alert("Sent!"); document.getElementById('doubt-modal').style.display = 'none';
+    };
+
+    // TEST SYSTEM
+    window.startTestFlow = async () => {
+      // Fetch a random test from DB
+      const snap = await getDocs(collection(db, "tests"));
+      if(snap.empty) return alert("Abhi koi test nahi hai!");
+      currentTestData = snap.docs[0].data(); // Just taking 1st test for demo
+      
+      if(askRollNo) { document.getElementById('roll-modal').style.display = 'flex'; }
+      else { document.getElementById('roll-number').value = "N/A"; startTestWithRoll(); }
+    };
+
+    window.startTestWithRoll = async () => {
+      const roll = document.getElementById('roll-number').value;
+      if(askRollNo && !roll) return alert("Roll Number dalein!");
+      userData.rollNo = roll;
+      document.getElementById('roll-modal').style.display = 'none';
+      
+      document.getElementById('test-screen').classList.remove('hidden');
+      qIndex = 0; answers = {}; loadQuestion();
+      
+      let time = (currentTestData.duration || 5) * 60;
+      clearInterval(testTimer);
+      testTimer = setInterval(() => {
+        time--; document.getElementById('test-timer').innerText = `${Math.floor(time/60)}:${time%60 < 10 ? '0'+time%60 : time%60}`;
+        if(time <= 0) { clearInterval(testTimer); alert("Time Up!"); submitTest(); }
+      }, 1000);
+    };
+
+    function loadQuestion() {
+      const q = currentTestData.questions[qIndex];
+      document.getElementById('q-text').innerText = `Q${qIndex+1}. ${q.text}`;
+      let h = '';
+      q.options.forEach((opt, i) => {
+        h += `<div class="option ${answers[qIndex]===i?'sel':''}" onclick="selectOpt(${i})">${String.fromCharCode(65+i)}. ${opt}</div>`;
+      });
+      document.getElementById('q-options').innerHTML = h;
+    }
+
+    window.selectOpt = (i) => { answers[qIndex] = i; loadQuestion(); };
+    
+    window.nextQuestion = () => {
+      if(qIndex < currentTestData.questions.length - 1) { qIndex++; loadQuestion(); }
+      else { if(confirm("Submit Test?")) submitTest(); }
+    };
+
+    async function submitTest() {
+      clearInterval(testTimer);
+      let correct = 0;
+      currentTestData.questions.forEach((q, i) => { if(answers[i] === q.correct) correct++; });
+      let percentage = ((correct / currentTestData.questions.length) * 100).toFixed(1);
+      
+      await addDoc(collection(db, "results"), {
+        userId: userData.uid, userName: userData.name, rollNo: userData.rollNo,
+        testTitle: currentTestData.title || "Mock Test", score: correct, total: currentTestData.questions.length,
+        percentage: parseFloat(percentage), date: new Date(), isReviewed: false
+      });
+      alert(`Result: ${correct}/${currentTestData.questions.length} (${percentage}%)`);
+      document.getElementById('test-screen').classList.add('hidden');
+    }
+
+    window.showPage = (id) => { document.getElementById(id).classList.remove('hidden'); };
+    window.hidePage = (id) => { document.getElementById(id).classList.add('hidden'); };
+  </script>
+</body>
+</html>
